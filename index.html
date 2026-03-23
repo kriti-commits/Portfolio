@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Supply Chain Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0e0e0e;
+      --paper: #f4f0e8;
+      --accent: #c84b2f;
+      --steel: #3a5c7a;
+      --muted: #8a8070;
+      --node-fill: #ffffff;
+      --node-stroke: #0e0e0e;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE TEXTURE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.4;
+    }
+
+    /* ─── TOP BAR ─── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      z-index: 100;
+      background: linear-gradient(to bottom, var(--paper) 60%, transparent);
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.12em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .logo span { color: var(--accent); }
+
+    /* ─── HAMBURGER MENU ─── */
+    .menu-wrap { position: relative; }
+
+    .menu-trigger {
+      display: flex; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 8px;
+    }
+    .menu-trigger span {
+      display: block; width: 28px; height: 2px;
+      background: var(--ink);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .menu-wrap:hover .menu-trigger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .menu-wrap:hover .menu-trigger span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .menu-wrap:hover .menu-trigger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--ink);
+      min-width: 180px;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .menu-wrap:hover .dropdown {
+      opacity: 1; pointer-events: all; transform: translateY(0);
+    }
+    .dropdown a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.85rem 1.4rem;
+      color: var(--paper);
+      text-decoration: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.15s, color 0.15s;
+    }
+    .dropdown a:last-child { border-bottom: none; }
+    .dropdown a:hover { background: var(--accent); color: #fff; }
+    .dropdown a .icon { font-size: 1rem; width: 18px; text-align: center; }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 6rem 2rem 3rem;
+      position: relative;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .hero-title em { color: var(--accent); font-style: normal; }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-align: center;
+      margin-bottom: 3.5rem;
+      font-weight: 300;
+    }
+
+    .hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .hint::before { content: '↓  '; }
+    .hint::after  { content: '  ↓'; }
+
+    /* ─── SVG SUPPLY CHAIN ─── */
+    .chain-wrapper {
+      width: 100%; max-width: 1100px;
+      position: relative;
+    }
+
+    .chain-svg {
+      width: 100%; height: auto;
+      overflow: visible;
+    }
+
+    /* Connector lines */
+    .connector {
+      stroke: var(--muted);
+      stroke-width: 1.5;
+      stroke-dasharray: 5 4;
+      fill: none;
+      opacity: 0.5;
+    }
+    .arrow-head { fill: var(--muted); opacity: 0.5; }
+
+    /* Nodes */
+    .sc-node {
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .sc-node:hover { filter: drop-shadow(0 4px 16px rgba(200,75,47,0.35)); }
+
+    .node-box {
+      fill: var(--node-fill);
+      stroke: var(--node-stroke);
+      stroke-width: 1.5;
+      rx: 2;
+      transition: fill 0.2s, stroke 0.2s;
+    }
+    .sc-node:hover .node-box,
+    .sc-node.active .node-box {
+      fill: var(--accent);
+      stroke: var(--accent);
+    }
+
+    .node-icon {
+      font-size: 22px;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+
+    .node-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+      transition: fill 0.2s;
+    }
+    .sc-node:hover .node-label,
+    .sc-node.active .node-label { fill: #fff; }
+
+    /* ─── STREAM LABELS ─── */
+    .stream-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      fill: var(--muted);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .stream-bracket {
+      stroke: var(--muted);
+      stroke-width: 1;
+      fill: none;
+      opacity: 0.4;
+    }
+
+    /* ─── TOOLTIP ─── */
+    #tooltip {
+      position: fixed;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.9rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+      z-index: 200;
+      letter-spacing: 0.04em;
+    }
+    #tooltip::before {
+      content: '//  ';
+      color: var(--accent);
+    }
+
+    /* ─── PROJECT PANEL ─── */
+    #project-panel {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 6rem;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: none;
+    }
+    #project-panel.visible {
+      opacity: 1; transform: translateY(0); pointer-events: all;
+    }
+
+    .panel-header {
+      display: flex; align-items: baseline; gap: 1.2rem;
+      margin-bottom: 0.6rem;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 0.8rem;
+    }
+    .panel-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.08em;
+    }
+    .panel-title span { color: var(--accent); }
+    .panel-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .panel-intro {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 2.2rem;
+      max-width: 620px;
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .project-card {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 1.4rem 1.5rem;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .project-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0;
+      width: 0; height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    .project-card:hover::after { width: 100%; }
+    .project-card:hover { transform: translateY(-3px); }
+
+    .card-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.82rem;
+      color: rgba(244,240,232,0.6);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    .card-arrow {
+      position: absolute; bottom: 1.1rem; right: 1.2rem;
+      font-size: 1rem; color: var(--accent);
+      opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    }
+    .project-card:hover .card-arrow { opacity: 1; transform: translateX(3px); }
+
+    /* close btn */
+    .close-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 2.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none; border: 1px solid var(--muted);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .close-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <a class="logo" href="#"><span>SC</span>Portfolio</a>
+
+  <div class="menu-wrap">
+    <div class="menu-trigger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
+    <nav class="dropdown">
+      <a href="YOUR_RESUME_URL" target="_blank"><span class="icon">📄</span>Resume</a>
+      <a href="YOUR_ARTICLES_URL" target="_blank"><span class="icon">✍️</span>Articles</a>
+      <a href="https://linkedin.com/in/YOUR_HANDLE" target="_blank"><span class="icon">🔗</span>LinkedIn</a>
+      <a href="/cdn-cgi/l/email-protection#336a7c666173767e727a7f1d707c7e"><span class="icon">✉️</span>Email</a>
+      <a href="#references"><span class="icon">👥</span>References</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ─── TOOLTIP ─── -->
+<div id="tooltip"></div>
+
+<!-- ─── HERO ─── -->
+<main class="hero">
+  <p class="hero-sub">ENVIRONMENTAL SCIENCE  ·  ANALYST  ·  STRATEGIST</p>
+  <h1 class="hero-title">Your <em>Name</em> Here</h1>
+  <p class="hint">Hover a node · Click to explore projects</p>
+
+  <!-- ─── SUPPLY CHAIN SVG ─── -->
+  <div class="chain-wrapper">
+    <!--
+      SVG layout  (viewBox 0 0 980 310)
+      ─────────────────────────────────
+      Three stream groups, each with 3 nodes (100 × 80px each, 18px gap between nodes in a group).
+      Groups are separated by a wider 30px gap that holds an arrow connector.
+
+      Column X positions of node left edges:
+        Upstream:   10, 128, 246          centres: 60, 178, 296
+        Midstream: 346, 464, 582          centres: 396, 514, 632
+        Downstream: 682, 800, 900         centres: 732, 850, 950   (last node 80px wide)
+
+      Node top: y=110  →  centre y=150  →  bottom y=190
+      Stream bracket y: 210–230
+      Stream label y: 245
+    -->
+    <svg class="chain-svg" viewBox="0 0 980 270" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" class="arrow-head"/>
+        </marker>
+      </defs>
+
+      <!-- ── WITHIN-GROUP CONNECTORS (short, solid) ── -->
+      <!-- Upstream: node1→node2, node2→node3 -->
+      <line class="connector" x1="110" y1="150" x2="127" y2="150" marker-end="url(#arrow)"/>
+      <line class="connector" x1="228" y1="150" x2="245" y2="150" marker-end="url(#arrow)"/>
+      <!-- Midstream: node4→node5, node5→node6 -->
+      <line class="connector" x1="446" y1="150" x2="463" y2="150" marker-end="url(#arrow)"/>
+      <line class="connector" x1="564" y1="150" x2="581" y2="150" marker-end="url(#arrow)"/>
+      <!-- Downstream: node7→node8, node8→node9 -->
+      <line class="connector" x1="782" y1="150" x2="799" y2="150" marker-end="url(#arrow)"/>
+      <line class="connector" x1="882" y1="150" x2="899" y2="150" marker-end="url(#arrow)"/>
+
+      <!-- ── BETWEEN-GROUP CONNECTORS (longer, prominent) ── -->
+      <!-- Upstream → Midstream -->
+      <line class="connector" x1="346" y1="150" x2="363" y2="150" marker-end="url(#arrow)"
+            stroke-dasharray="none" stroke-width="2" opacity="0.7"/>
+      <!-- Midstream → Downstream -->
+      <line class="connector" x1="682" y1="150" x2="699" y2="150" marker-end="url(#arrow)"
+            stroke-dasharray="none" stroke-width="2" opacity="0.7"/>
+
+      <!-- ══════════════════════════════════════
+           UPSTREAM NODES  (x: 10, 128, 246)
+      ══════════════════════════════════════ -->
+
+      <!-- NODE 1 -->
+      <g class="sc-node" data-id="node-u1"
+         data-tip="Replace with your upstream topic 1 description">
+        <rect class="node-box" x="10" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="60" y="140">🌱</text>
+        <text class="node-label" x="60" y="168">Topic U1</text>
+      </g>
+
+      <!-- NODE 2 -->
+      <g class="sc-node" data-id="node-u2"
+         data-tip="Replace with your upstream topic 2 description">
+        <rect class="node-box" x="128" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="178" y="140">🔬</text>
+        <text class="node-label" x="178" y="168">Topic U2</text>
+      </g>
+
+      <!-- NODE 3 -->
+      <g class="sc-node" data-id="node-u3"
+         data-tip="Replace with your upstream topic 3 description">
+        <rect class="node-box" x="246" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="296" y="140">🗺️</text>
+        <text class="node-label" x="296" y="168">Topic U3</text>
+      </g>
+
+      <!-- ── UPSTREAM STREAM LABEL ── -->
+      <path class="stream-bracket" d="M10,198 L10,210 L346,210 L346,198"/>
+      <text class="stream-label" x="178" y="225">Upstream</text>
+
+      <!-- ══════════════════════════════════════
+           MIDSTREAM NODES  (x: 364, 482, 600)
+      ══════════════════════════════════════ -->
+
+      <!-- NODE 4 -->
+      <g class="sc-node" data-id="node-m1"
+         data-tip="Replace with your midstream topic 1 description">
+        <rect class="node-box" x="364" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="414" y="140">⚗️</text>
+        <text class="node-label" x="414" y="168">Topic M1</text>
+      </g>
+
+      <!-- NODE 5 -->
+      <g class="sc-node" data-id="node-m2"
+         data-tip="Replace with your midstream topic 2 description">
+        <rect class="node-box" x="482" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="532" y="140">📊</text>
+        <text class="node-label" x="532" y="168">Topic M2</text>
+      </g>
+
+      <!-- NODE 6 -->
+      <g class="sc-node" data-id="node-m3"
+         data-tip="Replace with your midstream topic 3 description">
+        <rect class="node-box" x="600" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="650" y="140">🏗️</text>
+        <text class="node-label" x="650" y="168">Topic M3</text>
+      </g>
+
+      <!-- ── MIDSTREAM STREAM LABEL ── -->
+      <path class="stream-bracket" d="M364,198 L364,210 L700,210 L700,198"/>
+      <text class="stream-label" x="532" y="225">Midstream</text>
+
+      <!-- ══════════════════════════════════════
+           DOWNSTREAM NODES  (x: 718, 836, 900 — last node 80px)
+      ══════════════════════════════════════ -->
+
+      <!-- NODE 7 -->
+      <g class="sc-node" data-id="node-d1"
+         data-tip="Replace with your downstream topic 1 description">
+        <rect class="node-box" x="718" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="768" y="140">🌍</text>
+        <text class="node-label" x="768" y="168">Topic D1</text>
+      </g>
+
+      <!-- NODE 8 -->
+      <g class="sc-node" data-id="node-d2"
+         data-tip="Replace with your downstream topic 2 description">
+        <rect class="node-box" x="836" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="886" y="140">♻️</text>
+        <text class="node-label" x="886" y="168">Topic D2</text>
+      </g>
+
+      <!-- NODE 9 -->
+      <g class="sc-node" data-id="node-d3"
+         data-tip="Replace with your downstream topic 3 description">
+        <rect class="node-box" x="954" y="110" width="100" height="80" rx="2"/>
+        <text class="node-icon" x="1004" y="140">👥</text>
+        <text class="node-label" x="1004" y="168">Topic D3</text>
+      </g>
+
+      <!-- ── DOWNSTREAM STREAM LABEL ── -->
+      <path class="stream-bracket" d="M718,198 L718,210 L1054,210 L1054,198"/>
+      <text class="stream-label" x="886" y="225">Downstream</text>
+    </svg>
+  </div>
+
+  <!-- ─── PROJECT PANEL ─── -->
+  <div id="project-panel">
+    <div class="panel-header">
+      <h2 class="panel-title">Projects — <span id="panel-node-name">Node</span></h2>
+      <span class="panel-count" id="panel-count"></span>
+    </div>
+    <p class="panel-intro" id="panel-intro"></p>
+    <div class="projects-grid" id="projects-grid"></div>
+    <button class="close-btn" id="close-btn">✕ &nbsp;Close</button>
+  </div>
+</main>
+
+<footer>
+  © 2026 Your Name · Built with purpose
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ─────────────────────────────────────────
+//  DATA — edit this object with your real projects
+//  9 nodes: node-u1/u2/u3 (Upstream), node-m1/m2/m3 (Midstream), node-d1/d2/d3 (Downstream)
+//  Each node has an intro paragraph and 3-4 project cards.
+//  Fields per project: tag, title, desc, link
+// ─────────────────────────────────────────
+const DATA = {
+  "node-u1": {
+    intro: "Projects related to your first upstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Research",   title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Analysis",   title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Field Work", title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-u2": {
+    intro: "Projects related to your second upstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Modeling",   title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Data",       title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Publication",title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Collab",     title: "Project Title 4", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-u3": {
+    intro: "Projects related to your third upstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "GIS",        title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Remote Sensing", title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Survey",     title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-m1": {
+    intro: "Projects related to your first midstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Lab",        title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Monitoring", title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Regulation", title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Compliance", title: "Project Title 4", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-m2": {
+    intro: "Projects related to your second midstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Analytics",  title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Reporting",  title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Dashboard",  title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-m3": {
+    intro: "Projects related to your third midstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Engineering",title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Design",     title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Assessment", title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Review",     title: "Project Title 4", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-d1": {
+    intro: "Projects related to your first downstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Impact",     title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Community",  title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Policy",     title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-d2": {
+    intro: "Projects related to your second downstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Circular",   title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Waste",      title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Recovery",   title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "LCA",        title: "Project Title 4", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  },
+  "node-d3": {
+    intro: "Projects related to your third downstream topic — replace this intro with a 1–2 sentence overview of your work in this area.",
+    projects: [
+      { tag: "Outreach",   title: "Project Title 1", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Education",  title: "Project Title 2", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+      { tag: "Stakeholder",title: "Project Title 3", desc: "Brief description of this project, what you did, and the impact or outcome.", link: "#" },
+    ]
+  }
+};
+
+// ─────────────────────────────────────────
+//  TOOLTIP
+// ─────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+document.querySelectorAll('.sc-node').forEach(node => {
+  const tip = node.dataset.tip;
+
+  node.addEventListener('mouseenter', e => {
+    tooltip.textContent = tip;
+    tooltip.style.opacity = '1';
+  });
+  node.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top  = (e.clientY - 36) + 'px';
+  });
+  node.addEventListener('mouseleave', () => {
+    tooltip.style.opacity = '0';
+  });
+
+  // ─────────────────────────────────────────
+  //  CLICK → SHOW PROJECTS
+  // ─────────────────────────────────────────
+  node.addEventListener('click', () => {
+    const id = node.dataset.id;
+    const d  = DATA[id];
+    if (!d) return;
+
+    // label
+    const labelEl = node.querySelector('.node-label');
+    document.getElementById('panel-node-name').textContent = labelEl.textContent;
+    document.getElementById('panel-count').textContent = `${d.projects.length} project${d.projects.length !== 1 ? 's' : ''}`;
+    document.getElementById('panel-intro').textContent = d.intro;
+
+    // cards
+    const grid = document.getElementById('projects-grid');
+    grid.innerHTML = d.projects.map(p => `
+      <div class="project-card" onclick="window.open('${p.link}','_blank')">
+        <div class="card-tag">${p.tag}</div>
+        <div class="card-title">${p.title}</div>
+        <div class="card-desc">${p.desc}</div>
+        <div class="card-arrow">→</div>
+      </div>
+    `).join('');
+
+    // active state
+    document.querySelectorAll('.sc-node').forEach(n => n.classList.remove('active'));
+    node.classList.add('active');
+
+    // show panel
+    const panel = document.getElementById('project-panel');
+    panel.classList.add('visible');
+    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  });
+});
+
+// ─────────────────────────────────────────
+//  CLOSE BUTTON
+// ─────────────────────────────────────────
+document.getElementById('close-btn').addEventListener('click', () => {
+  document.getElementById('project-panel').classList.remove('visible');
+  document.querySele
