@@ -78,9 +78,10 @@
       transition: opacity 0.25s ease, transform 0.25s ease;
       border: 1px solid rgba(255,255,255,0.08);
     }
-    .menu-wrap:hover .dropdown {
-      opacity: 1; pointer-events: all; transform: translateY(0);
-    }
+   .menu-wrap:hover .dropdown,
+.menu-wrap.open .dropdown {
+  opacity: 1; pointer-events: all; transform: translateY(0);
+}
     .dropdown a {
       display: flex; align-items: center; gap: 10px;
       padding: 0.85rem 1.4rem;
@@ -699,6 +700,17 @@ document.querySelectorAll('.sc-node').forEach(node => {
 // ─────────────────────────────────────────
 //  CLOSE BUTTON
 // ─────────────────────────────────────────
+// ── MENU CLICK TOGGLE ──
+const menuWrap = document.querySelector('.menu-wrap');
+const menuTrigger = document.querySelector('.menu-trigger');
+menuTrigger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  menuWrap.classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  if (!menuWrap.contains(e.target)) menuWrap.classList.remove('open');
+});
+
 document.getElementById('close-btn').addEventListener('click', () => {
   document.getElementById('project-panel').classList.remove('visible');
   document.querySele
