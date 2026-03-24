@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Articles · Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0e0e0e;
+      --paper: #f4f0e8;
+      --accent: #c84b2f;
+      --muted: #8a8070;
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .back-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.1em;
+    }
+    .page-title span { color: var(--accent); }
+
+    /* ── INTRO ── */
+    .intro {
+      max-width: 780px;
+      margin: 3rem auto 0;
+      padding: 0 2rem;
+    }
+    .intro h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      margin-bottom: 0.6rem;
+    }
+    .intro h1 em { color: var(--accent); font-style: normal; }
+    .intro p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    /* ── GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.4rem;
+      max-width: 1100px;
+      margin: 2.5rem auto 5rem;
+      padding: 0 2rem;
+    }
+
+    /* ── ARTICLE CARD ── */
+    .article-card {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: pointer;
+      display: flex; flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .article-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+    }
+
+    /* Image / preview area */
+    .card-preview {
+      width: 100%;
+      height: 190px;
+      overflow: hidden;
+      position: relative;
+      background: #e8e4dc;
+      flex-shrink: 0;
+    }
+    .card-preview img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .article-card:hover .card-preview img { transform: scale(1.03); }
+
+    /* Fallback placeholder when no image */
+    .card-preview .placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px;
+      background: linear-gradient(135deg, #e8e4dc 0%, #d4cfc4 100%);
+    }
+    .card-preview .placeholder span {
+      font-size: 2.2rem;
+    }
+    .card-preview .placeholder p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Domain pill overlay */
+    .domain-pill {
+      position: absolute; bottom: 8px; left: 10px;
+      background: rgba(14,14,14,0.72);
+      color: #fff;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Card body */
+    .card-body {
+      padding: 1.1rem 1.3rem 1.3rem;
+      display: flex; flex-direction: column; gap: 6px;
+      flex: 1;
+    }
+    .card-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.15rem;
+      letter-spacing: 0.05em;
+      line-height: 1.2;
+    }
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 300;
+      flex: 1;
+    }
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid rgba(0,0,0,0.07);
+    }
+    .card-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .card-cta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="index.html">← Back</a>
+  <div class="page-title"><span>✍️</span> Articles</div>
+</header>
+
+<section class="intro">
+  <h1>Written <em>Work</em></h1>
+  <!-- ✏️ EDIT: Change this intro paragraph -->
+  <p>A collection of articles, essays, and research pieces I've published on environmental science, policy, and analysis.</p>
+</section>
+
+<div class="grid" id="articles-grid"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  ARTICLES DATA  —  Edit this array to add / remove articles
+//
+//  Each article object:
+//    title   : Displayed as the card heading
+//    tag     : Short topic label (e.g. "Climate", "Policy")
+//    desc    : 1–2 sentence summary shown on the card
+//    date    : Publication date string
+//    link    : URL that opens when the card is clicked
+//    image   : HOW TO SET THE PREVIEW IMAGE — pick ONE option:
+//
+//      Option A — Auto website screenshot (free, no setup):
+//        image: { type: "screenshot", url: "https://your-article-url.com" }
+//
+//      Option B — Your own uploaded image file:
+//        1. Put your image (e.g. article1.jpg) in the same folder as this file
+//        2. image: { type: "file", src: "article1.jpg" }
+//
+//      Option C — Any image URL from the web:
+//        image: { type: "url", src: "https://example.com/image.jpg" }
+//
+// ═══════════════════════════════════════════════════════════════
+const ARTICLES = [
+  {
+    title:  "Article Title 1",
+    tag:    "Climate",
+    desc:   "A brief description of what this article is about and why it matters. 1–2 sentences.",
+    date:   "Jan 2025",
+    link:   "https://your-article-1-url.com",
+    image:  { type: "screenshot", url: "https://your-article-1-url.com" }
+    //      ↑ OPTION A: auto screenshot. Replace URL with your article's URL.
+    // image: { type: "file", src: "article1.jpg" }
+    //      ↑ OPTION B: upload article1.jpg to same folder, uncomment this line
+  },
+  {
+    title:  "Article Title 2",
+    tag:    "Policy",
+    desc:   "A brief description of what this article is about and why it matters. 1–2 sentences.",
+    date:   "Mar 2025",
+    link:   "https://your-article-2-url.com",
+    image:  { type: "screenshot", url: "https://your-article-2-url.com" }
+  },
+  {
+    title:  "Article Title 3",
+    tag:    "Research",
+    desc:   "A brief description of what this article is about and why it matters. 1–2 sentences.",
+    date:   "Jun 2025",
+    link:   "https://your-article-3-url.com",
+    image:  { type: "screenshot", url: "https://your-article-3-url.com" }
+  },
+  {
+    title:  "Article Title 4",
+    tag:    "Analysis",
+    desc:   "A brief description of what this article is about and why it matters. 1–2 sentences.",
+    date:   "Sep 2025",
+    link:   "https://your-article-4-url.com",
+    image:  { type: "file", src: "article4.jpg" }
+    //      ↑ OPTION B example: put article4.jpg in same folder
+  },
+];
+
+// ── RENDER ──────────────────────────────────────────────────────
+function getImageHTML(image, link) {
+  let imgTag = '';
+
+  if (image.type === 'screenshot') {
+    // Uses Google's free page thumbnail service
+    const encoded = encodeURIComponent(image.url || link);
+    const src = `https://s.wordpress.com/mshots/v1/${encoded}?w=600`;
+    imgTag = `<img src="${src}" alt="Article preview" loading="lazy"
+                   onerror="this.parentElement.innerHTML='<div class=\'placeholder\'><span>✍️</span><p>Preview unavailable</p></div>'" />`;
+  } else if (image.type === 'file' || image.type === 'url') {
+    const src = image.src;
+    imgTag = `<img src="${src}" alt="Article preview" loading="lazy"
+                   onerror="this.parentElement.innerHTML='<div class=\'placeholder\'><span>✍️</span><p>Image not found</p></div>'" />`;
+  } else {
+    imgTag = `<div class="placeholder"><span>✍️</span><p>No preview set</p></div>`;
+  }
+
+  // Extract domain for pill
+  let domain = '';
+  try { domain = new URL(link).hostname.replace('www.', ''); } catch(e) {}
+
+  return `${imgTag}${domain ? `<div class="domain-pill">${domain}</div>` : ''}`;
+}
+
+const grid = document.getElementById('articles-grid');
+grid.innerHTML = ARTICLES.map(a => `
+  <a class="article-card" href="${a.link}" target="_blank" rel="noopener">
+    <div class="card-preview">
+      ${getImageHTML(a.image, a.link)}
+    </div>
+    <div class="card-body">
+      <div class="card-tag">${a.tag}</div>
+      <div class="card-title">${a.title}</div>
+      <div class="card-desc">${a.desc}</div>
+      <div class="card-footer">
+        <span class="card-date">${a.date}</span>
+        <span class="card-cta">Read →</span>
+      </div>
+    </div>
+  </a>
+`).join('');
+</script>
+</body>
+</html>
